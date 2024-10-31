@@ -1,0 +1,28 @@
+<div class="status-container">
+  <h2>Conversion Status</h2>
+
+  <div class="status-content" *ngIf="!error">
+    <div class="status-info">
+      <div class="status-indicator" [ngClass]="status">
+        {{ status || 'Checking status...' }}
+      </div>
+      
+      <div class="progress-spinner" *ngIf="status !== 'completed' && status !== 'failed'">
+        <div class="spinner"></div>
+      </div>
+    </div>
+
+    <div class="job-id">
+      Job ID: {{ jobId }}
+    </div>
+  </div>
+
+  <div class="error-container" *ngIf="error">
+    <div class="error-message">
+      {{ error }}
+    </div>
+    <button class="retry-button" (click)="retry()">
+      Try Again
+    </button>
+  </div>
+</div>

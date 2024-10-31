@@ -1,0 +1,23 @@
+# backend/Dockerfile
+FROM node:18
+
+# Install FFmpeg
+RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
+
+# Create app directory
+WORKDIR /usr/src/app
+
+# Copy package.json and package-lock.json
+COPY package*.json ./
+
+# Install app dependencies
+RUN npm install
+
+# Copy app source code
+COPY . .
+
+# Expose port
+EXPOSE 3000
+
+# Start the server
+CMD ["npm", "start"]

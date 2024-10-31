@@ -1,0 +1,15 @@
+.vscode/
+bin/
+obj/
+logs/
+gifs/
+uploads/
+
+node_modules/
+npm-debug.log
+.env
+
+# Angular
+/dist
+/tmp
+/out-tsc

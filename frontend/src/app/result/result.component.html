@@ -1,0 +1,32 @@
+<div class="result-container">
+  <h2>Conversion Result</h2>
+
+  <div class="result-content" *ngIf="!error">
+    <div class="loading-spinner" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p>Loading your GIF...</p>
+    </div>
+
+    <div class="gif-container" *ngIf="!isLoading && gifUrl">
+      <img [src]="gifUrl" alt="Converted GIF" class="gif-preview">
+      
+      <div class="action-buttons">
+        <button class="download-button" (click)="downloadGif()">
+          Download GIF
+        </button>
+        <button class="convert-another-button" (click)="convertAnother()">
+          Convert Another Video
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="error-container" *ngIf="error">
+    <div class="error-message">
+      {{ error }}
+    </div>
+    <button class="retry-button" (click)="convertAnother()">
+      Try Again
+    </button>
+  </div>
+</div>

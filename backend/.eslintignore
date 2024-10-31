@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Generated files
+uploads/
+gifs/
+logs/
+
+# Configuration files
+.eslintrc.js
+.prettierrc
+*.config.js
+
+# Environment files
+.env
+.env.*
+
+# Package files
+package.json
+package-lock.json
+
+# Documentation
+*.md
+docs/
+
+# Test coverage
+coverage/

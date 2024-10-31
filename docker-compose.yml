@@ -1,0 +1,118 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  frontend:
+    image: nbobovnikovdilyasoft/test_projects:mp4-to-gif-frontend
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "4200:80"
+    environment:
+      - API_URL=http://backend:3000/api
+      - CORS_ORIGIN=http://localhost:4200
+    networks:
+      - app-network
+    depends_on:
+      - backend
+
+  backend:
+    image: nbobovnikovdilyasoft/test_projects:mp4-to-gif-backend
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_MAX_RETRIES=10
+      - REDIS_RETRY_DELAY=3000
+      - MAX_CONCURRENT_JOBS=5
+      - JOB_TIMEOUT=300000
+      - UPLOAD_DIR=/uploads
+      - GIF_DIR=/gifs
+      - MAX_FILE_SIZE=50MB
+      - CORS_ORIGIN=http://localhost:4200
+      - LOG_LEVEL=info
+    volumes:
+      - backend-uploads:/uploads
+      - backend-gifs:/gifs
+    networks:
+      - app-network
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  worker:
+    image: nbobovnikovdilyasoft/test_projects:mp4-to-gif-worker
+    deploy:
+      replicas: 5
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+        delay: 5s
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_MAX_RETRIES=10
+      - REDIS_RETRY_DELAY=3000
+      - UPLOAD_DIR=/uploads
+      - GIF_DIR=/gifs
+      - MAX_FILE_SIZE=50MB
+      - MAX_CONCURRENT_JOBS=5
+      - JOB_TIMEOUT=300000
+      - LOG_LEVEL=info
+    volumes:
+      - backend-uploads:/uploads
+      - backend-gifs:/gifs
+    networks:
+      - app-network
+    depends_on:
+      - redis
+      - backend
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('./worker/health.js')().then(healthy => process.exit(healthy ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  redis:
+    image: redis:alpine
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  app-network:
+    driver: overlay
+
+volumes:
+  backend-uploads:
+  backend-gifs:
+  redis-data:
